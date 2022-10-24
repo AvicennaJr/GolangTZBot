@@ -7,6 +7,17 @@ import (
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 )
 
+var menuKeyboard = tgbotapi.NewReplyKeyboard(
+	tgbotapi.NewKeyboardButtonRow(
+		tgbotapi.NewKeyboardButton("Books"),
+		tgbotapi.NewKeyboardButton("Games"),
+	),
+	tgbotapi.NewKeyboardButtonRow(
+		tgbotapi.NewKeyboardButton("Videos"),
+		tgbotapi.NewKeyboardButton("Jokes"),
+	),
+)
+
 func main() {
 	bot, err := tgbotapi.NewBotAPI(os.Getenv("GOLANGTZBOT"))
 	if err != nil {
@@ -45,6 +56,10 @@ func main() {
 			msg.Text = "I'm incomplete :("
 		case "joke":
 			msg.Text = Joke()
+		case "menu":
+			msg.ReplyMarkup = menuKeyboard
+		case "close":
+			msg.ReplyMarkup = tgbotapi.NewRemoveKeyboard(true)
 		default:
 			msg.Text = "I don't know that command"
 		}
