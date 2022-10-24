@@ -44,7 +44,7 @@ func main() {
 
 		// Create a new MessageConfig. We don't have text yet,
 		// so we leave it empty.
-		msg := tgbotapi.NewMessage(update.Message.Chat.ID, "")
+		msg := tgbotapi.NewMessage(update.Message.Chat.ID, update.Message.Text)
 
 		// Extract the command from the Message.
 		switch update.Message.Command() {
@@ -58,8 +58,10 @@ func main() {
 			msg.Text = Joke()
 		case "menu":
 			msg.ReplyMarkup = menuKeyboard
+			msg.Text = "Menu Opened"
 		case "close":
 			msg.ReplyMarkup = tgbotapi.NewRemoveKeyboard(true)
+			msg.Text = "Menu Closed"
 		default:
 			msg.Text = "I don't know that command"
 		}
