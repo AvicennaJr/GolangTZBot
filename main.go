@@ -38,12 +38,17 @@ func main() {
 			continue
 		}
 
+		if len(update.Message.NewChatMembers) > 0 {
+			deleteRequest := tgbotapi.NewDeleteMessage(update.Message.Chat.ID, update.Message.MessageID)
+			if _, err := bot.Request(deleteRequest); err != nil {
+				log.Panic(err)
+			}
+
+		}
+
 		if !update.Message.IsCommand() { // ignore any non-command Messages for now. Will add filtering etc later.
 			continue
 		}
-
-		// Create a new MessageConfig. We don't have text yet,
-		// so we leave it empty.
 		msg := tgbotapi.NewMessage(update.Message.Chat.ID, update.Message.Text)
 
 		// Extract the command from the Message.
