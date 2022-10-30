@@ -43,7 +43,17 @@ func main() {
 			if _, err := bot.Request(deleteRequest); err != nil {
 				log.Panic(err)
 			}
+			continue
 
+		}
+
+		if update.Message.LeftChatMember != nil {
+			deleteRequest := tgbotapi.NewDeleteMessage(update.Message.Chat.ID, update.Message.MessageID)
+			if _, err := bot.Request(deleteRequest); err != nil {
+				log.Panic(err)
+			}
+			log.Printf("Left Message has been deleted")
+			continue
 		}
 
 		if !update.Message.IsCommand() { // ignore any non-command Messages for now. Will add filtering etc later.
