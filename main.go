@@ -8,24 +8,13 @@ import (
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 )
 
-var menuKeyboard = tgbotapi.NewReplyKeyboard(
-	tgbotapi.NewKeyboardButtonRow(
-		tgbotapi.NewKeyboardButton("Books"),
-		tgbotapi.NewKeyboardButton("Games"),
-	),
-	tgbotapi.NewKeyboardButtonRow(
-		tgbotapi.NewKeyboardButton("Videos"),
-		tgbotapi.NewKeyboardButton("Jokes"),
-	),
-)
-
 func main() {
 	bot, err := tgbotapi.NewBotAPI(os.Getenv("GOLANGTZBOT"))
 	if err != nil {
 		log.Panic(err)
 	}
 
-	bot.Debug = true
+	bot.Debug = false
 
 	log.Printf("Authorized on account %s", bot.Self.UserName)
 
@@ -73,7 +62,7 @@ func main() {
 		if !update.Message.IsCommand() {
 			continue
 		}
-		msg := tgbotapi.NewMessage(update.Message.Chat.ID, update.Message.Text)
+		msg := tgbotapi.NewMessage(update.Message.Chat.ID, "")
 
 		switch update.Message.Command() {
 		case "help":
@@ -84,12 +73,6 @@ func main() {
 			msg.Text = "I'm incomplete :("
 		case "joke":
 			msg.Text = Joke()
-		case "menu":
-			msg.ReplyMarkup = menuKeyboard
-			msg.Text = "Menu Opened"
-		case "close":
-			msg.ReplyMarkup = tgbotapi.NewRemoveKeyboard(true)
-			msg.Text = "Menu Closed"
 		default:
 			msg.Text = "I don't know that command"
 		}
