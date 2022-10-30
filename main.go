@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"log"
 	"os"
 
@@ -34,15 +35,24 @@ func main() {
 	updates := bot.GetUpdatesChan(u)
 
 	for update := range updates {
-		if update.Message == nil { // ignore any non-Message updates.
+		if update.Message == nil {
 			continue
 		}
 
-		if len(update.Message.NewChatMembers) > 0 {
+		if update.Message.NewChatMembers != nil {
 			deleteRequest := tgbotapi.NewDeleteMessage(update.Message.Chat.ID, update.Message.MessageID)
 			if _, err := bot.Request(deleteRequest); err != nil {
 				log.Panic(err)
 			}
+
+			member, _ := bot.GetChatMembersCount(tgbotapi.ChatMemberCountConfig{ChatConfig: update.FromChat().ChatConfig()})
+			welcomeText := fmt.Sprintf("Karibu %v. You are member number %v", update.Message.From.FirstName, member)
+			welcomeMsg := tgbotapi.NewMessage(update.Message.Chat.ID, welcomeText)
+
+			if _, err := bot.Send(welcomeMsg); err != nil {
+				log.Panic(err)
+			}
+
 			continue
 
 		}
@@ -52,16 +62,19 @@ func main() {
 			if _, err := bot.Request(deleteRequest); err != nil {
 				log.Panic(err)
 			}
-			log.Printf("Left Message has been deleted")
+			goodbyeMsg := tgbotapi.NewMessage(update.Message.Chat.ID, "Another fallen soldier")
+
+			if _, err := bot.Send(goodbyeMsg); err != nil {
+				log.Panic(err)
+			}
 			continue
 		}
 
-		if !update.Message.IsCommand() { // ignore any non-command Messages for now. Will add filtering etc later.
+		if !update.Message.IsCommand() {
 			continue
 		}
 		msg := tgbotapi.NewMessage(update.Message.Chat.ID, update.Message.Text)
 
-		// Extract the command from the Message.
 		switch update.Message.Command() {
 		case "help":
 			msg.Text = "So far I can only make Jokes. Use `/joke`"
