@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"time"
 
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 )
@@ -14,7 +15,7 @@ func main() {
 		log.Panic(err)
 	}
 
-	bot.Debug = false
+	bot.Debug = true
 
 	log.Printf("Authorized on account %s", bot.Self.UserName)
 
@@ -38,7 +39,15 @@ func main() {
 			welcomeText := fmt.Sprintf("Karibu %v. You are member number %v", update.Message.From.FirstName, member)
 			welcomeMsg := tgbotapi.NewMessage(update.Message.Chat.ID, welcomeText)
 
-			if _, err := bot.Send(welcomeMsg); err != nil {
+			sentMsg, err := bot.Send(welcomeMsg)
+
+			if err != nil {
+				log.Panic(err)
+			}
+
+			time.Sleep(60 * time.Second)
+			deleteMsg := tgbotapi.NewDeleteMessage(sentMsg.Chat.ID, sentMsg.MessageID)
+			if _, err := bot.Request(deleteMsg); err != nil {
 				log.Panic(err)
 			}
 
@@ -80,5 +89,6 @@ func main() {
 		if _, err := bot.Send(msg); err != nil {
 			log.Panic(err)
 		}
+
 	}
 }
