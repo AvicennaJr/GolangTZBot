@@ -27,70 +27,74 @@ func main() {
 	updates := bot.GetUpdatesChan(u)
 
 	for update := range updates {
-		if update.Message == nil {
-			continue
-		}
+		go singleUpdate(update, bot)
+	}
+}
 
-		if update.Message.NewChatMembers != nil {
-			deleteRequest := tgbotapi.NewDeleteMessage(update.Message.Chat.ID, update.Message.MessageID)
-			if _, err := bot.Request(deleteRequest); err != nil {
-				log.Panic(err)
-			}
+func singleUpdate(update tgbotapi.Update, bot *tgbotapi.BotAPI) {
+	if update.Message == nil {
+		return
+	}
 
-			member, _ := bot.GetChatMembersCount(tgbotapi.ChatMemberCountConfig{ChatConfig: update.FromChat().ChatConfig()})
-			welcomeText := fmt.Sprintf("Karibu %v %v. You are member number %v", update.Message.From.FirstName, emoji.WavingHand, member)
-			welcomeMsg := tgbotapi.NewMessage(update.Message.Chat.ID, welcomeText)
-
-			sentMsg, err := bot.Send(welcomeMsg)
-
-			if err != nil {
-				log.Panic(err)
-			}
-
-			time.Sleep(60 * time.Second)
-			deleteMsg := tgbotapi.NewDeleteMessage(sentMsg.Chat.ID, sentMsg.MessageID)
-			if _, err := bot.Request(deleteMsg); err != nil {
-				log.Panic(err)
-			}
-
-			continue
-
-		}
-
-		if update.Message.LeftChatMember != nil {
-			deleteRequest := tgbotapi.NewDeleteMessage(update.Message.Chat.ID, update.Message.MessageID)
-			if _, err := bot.Request(deleteRequest); err != nil {
-				log.Panic(err)
-			}
-			goodbyeMsg := tgbotapi.NewMessage(update.Message.Chat.ID, "Another fallen soldier")
-
-			if _, err := bot.Send(goodbyeMsg); err != nil {
-				log.Panic(err)
-			}
-			continue
-		}
-
-		if !update.Message.IsCommand() {
-			continue
-		}
-		msg := tgbotapi.NewMessage(update.Message.Chat.ID, "")
-
-		switch update.Message.Command() {
-		case "help":
-			msg.Text = "So far I can only make Jokes. Use `/joke`"
-		case "hi":
-			msg.Text = "Hello there! :)"
-		case "status":
-			msg.Text = "I'm incomplete :("
-		case "joke":
-			msg.Text = Joke()
-		default:
-			msg.Text = "I don't know that command"
-		}
-
-		if _, err := bot.Send(msg); err != nil {
+	if update.Message.NewChatMembers != nil {
+		deleteRequest := tgbotapi.NewDeleteMessage(update.Message.Chat.ID, update.Message.MessageID)
+		if _, err := bot.Request(deleteRequest); err != nil {
 			log.Panic(err)
 		}
 
+		member, _ := bot.GetChatMembersCount(tgbotapi.ChatMemberCountConfig{ChatConfig: update.FromChat().ChatConfig()})
+		welcomeText := fmt.Sprintf("Karibu %v %v. You are member number %v", update.Message.From.FirstName, emoji.WavingHand, member)
+		welcomeMsg := tgbotapi.NewMessage(update.Message.Chat.ID, welcomeText)
+
+		sentMsg, err := bot.Send(welcomeMsg)
+
+		if err != nil {
+			log.Panic(err)
+		}
+
+		time.Sleep(60 * time.Second)
+		deleteMsg := tgbotapi.NewDeleteMessage(sentMsg.Chat.ID, sentMsg.MessageID)
+		if _, err := bot.Request(deleteMsg); err != nil {
+			log.Panic(err)
+		}
+
+		return
+
 	}
+
+	if update.Message.LeftChatMember != nil {
+		deleteRequest := tgbotapi.NewDeleteMessage(update.Message.Chat.ID, update.Message.MessageID)
+		if _, err := bot.Request(deleteRequest); err != nil {
+			log.Panic(err)
+		}
+		goodbyeMsg := tgbotapi.NewMessage(update.Message.Chat.ID, "Another fallen soldier")
+
+		if _, err := bot.Send(goodbyeMsg); err != nil {
+			log.Panic(err)
+		}
+		return
+	}
+
+	if !update.Message.IsCommand() {
+		return
+	}
+	msg := tgbotapi.NewMessage(update.Message.Chat.ID, "")
+
+	switch update.Message.Command() {
+	case "help":
+		msg.Text = "So far I can only make Jokes. Use `/joke`"
+	case "hi":
+		msg.Text = "Hello there! :)"
+	case "status":
+		msg.Text = "I'm incomplete :("
+	case "joke":
+		msg.Text = Joke()
+	default:
+		msg.Text = "I don't know that command"
+	}
+
+	if _, err := bot.Send(msg); err != nil {
+		log.Panic(err)
+	}
+
 }
