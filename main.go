@@ -7,6 +7,8 @@ import (
 	"time"
 
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
+
+	"github.com/enescakir/emoji"
 )
 
 func main() {
@@ -36,7 +38,7 @@ func main() {
 			}
 
 			member, _ := bot.GetChatMembersCount(tgbotapi.ChatMemberCountConfig{ChatConfig: update.FromChat().ChatConfig()})
-			welcomeText := fmt.Sprintf("Karibu %v. You are member number %v", update.Message.From.FirstName, member)
+			welcomeText := fmt.Sprintf("Karibu %v %v. You are member number %v", update.Message.From.FirstName, emoji.WavingHand, member)
 			welcomeMsg := tgbotapi.NewMessage(update.Message.Chat.ID, welcomeText)
 
 			sentMsg, err := bot.Send(welcomeMsg)
