@@ -11,6 +11,12 @@ import (
 	"github.com/enescakir/emoji"
 )
 
+var helpMenu = tgbotapi.NewInlineKeyboardMarkup(
+	tgbotapi.NewInlineKeyboardRow(
+		tgbotapi.NewInlineKeyboardButtonData("Help", "help"),
+	),
+)
+
 func main() {
 	bot, err := tgbotapi.NewBotAPI(os.Getenv("GOLANGTZBOT"))
 	if err != nil {
@@ -32,8 +38,15 @@ func main() {
 }
 
 func singleUpdate(update tgbotapi.Update, bot *tgbotapi.BotAPI) {
-	if update.Message == nil {
-		return
+
+	if update.CallbackQuery != nil {
+
+		receivedData := update.CallbackData()
+
+		switch receivedData {
+		case "help":
+			log.Println("It worked")
+		}
 	}
 
 	if update.Message.NewChatMembers != nil {
@@ -45,7 +58,7 @@ func singleUpdate(update tgbotapi.Update, bot *tgbotapi.BotAPI) {
 		member, _ := bot.GetChatMembersCount(tgbotapi.ChatMemberCountConfig{ChatConfig: update.FromChat().ChatConfig()})
 		welcomeText := fmt.Sprintf("Karibu %v %v. You are member number %v", update.Message.From.FirstName, emoji.WavingHand, member)
 		welcomeMsg := tgbotapi.NewMessage(update.Message.Chat.ID, welcomeText)
-
+		welcomeMsg.ReplyMarkup = helpMenu
 		sentMsg, err := bot.Send(welcomeMsg)
 
 		if err != nil {
@@ -82,7 +95,9 @@ func singleUpdate(update tgbotapi.Update, bot *tgbotapi.BotAPI) {
 
 	switch update.Message.Command() {
 	case "help":
+		log.Println("Should print lol")
 		msg.Text = "So far I can only make Jokes. Use `/joke`"
+		msg.ReplyMarkup = helpMenu
 	case "hi":
 		msg.Text = "Hello there! :)"
 	case "status":
