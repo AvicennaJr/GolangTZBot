@@ -17,6 +17,12 @@ var helpMenu = tgbotapi.NewInlineKeyboardMarkup(
 	),
 )
 
+var generateJoke = tgbotapi.NewInlineKeyboardMarkup(
+	tgbotapi.NewInlineKeyboardRow(
+		tgbotapi.NewInlineKeyboardButtonData("Joke", "joke"),
+	),
+)
+
 func main() {
 	bot, err := tgbotapi.NewBotAPI(os.Getenv("GOLANGTZBOT"))
 	if err != nil {
@@ -41,12 +47,25 @@ func singleUpdate(update tgbotapi.Update, bot *tgbotapi.BotAPI) {
 
 	if update.CallbackQuery != nil {
 
+		responseMsg := tgbotapi.NewCallbackWithAlert(update.CallbackQuery.ID, "")
+
 		receivedData := update.CallbackData()
 
 		switch receivedData {
 		case "help":
-			log.Println("It worked")
+			responseMsg.Text = "Coming Soon"
+			if _, err := bot.Request(responseMsg); err != nil {
+				log.Panic(err)
+			}
+		case "joke":
+			responseMsg.Text = Joke()
+			responseMsg.CacheTime = 10
+			if _, err := bot.Request(responseMsg); err != nil {
+				log.Panic(err)
+			}
+
 		}
+		return
 	}
 
 	if update.Message.NewChatMembers != nil {
@@ -95,15 +114,15 @@ func singleUpdate(update tgbotapi.Update, bot *tgbotapi.BotAPI) {
 
 	switch update.Message.Command() {
 	case "help":
-		log.Println("Should print lol")
-		msg.Text = "So far I can only make Jokes. Use `/joke`"
+		msg.Text = "So far I can only make Jokes. Use /joke"
 		msg.ReplyMarkup = helpMenu
 	case "hi":
 		msg.Text = "Hello there! :)"
 	case "status":
 		msg.Text = "I'm incomplete :("
 	case "joke":
-		msg.Text = Joke()
+		msg.Text = "Tap the button to get random programming jokes"
+		msg.ReplyMarkup = generateJoke
 	default:
 		msg.Text = "I don't know that command"
 	}
